@@ -3,6 +3,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     groq_api_key: str
     groq_api_url: str
+    mistral_api_key: str
     qdrant_url: str
     postgres_url: str
 
