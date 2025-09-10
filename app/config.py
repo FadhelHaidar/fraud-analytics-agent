@@ -1,11 +1,3 @@
-# config.py
-"""
-Clean, import-friendly factories for embeddings, LLM, vector store, and Vanna.
-- No side effects at import time.
-- All initializers are small, composable functions.
-- get_vanna() is cached so you can import and reuse it safely.
-"""
-
 from __future__ import annotations
 
 from functools import lru_cache
@@ -17,21 +9,20 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_qdrant import QdrantVectorStore
 from qdrant_client import QdrantClient
 
-# vanna
+from vanna.base import VannaBase
 from vanna.mistral import Mistral as VannaMistral
 from vanna.qdrant import Qdrant_VectorStore as VannaQdrant_VectorStore
 
 from app.settings import settings
 
 
-# ===== Defaults (override via function args if needed) =====
 DEFAULT_EMBED_MODEL = "Qwen/Qwen3-Embedding-0.6B"
 DEFAULT_LLM_MODEL = "groq:meta-llama/llama-4-maverick-17b-128e-instruct"
 DEFAULT_CODER_MODEL = "codestral-latest"
 DEFAULT_QDRANT_COLLECTION = "my_documents"
 
 
-# ===== Embeddings / LLM / Qdrant =====
+@lru_cache(maxsize=1)
 def get_embeddings(model_name: str = DEFAULT_EMBED_MODEL) -> HuggingFaceEmbeddings:
     """Return a HuggingFace embeddings model."""
     return HuggingFaceEmbeddings(model_name=model_name)
@@ -69,13 +60,20 @@ def get_vector_store(
 
 
 # ===== Vanna (Qdrant + Mistral) =====
-class MyVanna(VannaQdrant_VectorStore, VannaMistral):
+
+class PatchVannaBase(VannaBase):
+    def log(self, message, title = "Info"):
+        return
+
+class MyVanna(PatchVannaBase, VannaQdrant_VectorStore, VannaMistral):
     """
     Vanna that uses Qdrant as the vector store and Mistral as the coder model.
     Construct with a config dict compatible with VannaQdrant_VectorStore and VannaMistral.
     """
 
     def __init__(self, config: Optional[Dict] = None):
+
+        PatchVannaBase.__init__(self)
         VannaQdrant_VectorStore.__init__(self, config=config)
         VannaMistral.__init__(
             self,

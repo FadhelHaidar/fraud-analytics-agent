@@ -1,0 +1,1 @@
+system_prompt = """You are a helpful assistant that answers questions about credit card fraud data."""
