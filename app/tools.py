@@ -24,7 +24,7 @@ def auto_tool(args_schema):
     return decorator
 
 @auto_tool(args_schema=Query)
-async def ask_about_credit_cards_fraud_theory(query: str) -> str:
+def ask_about_credit_cards_fraud_theory(query: str) -> str:
     """Useful for retrieving information about credit card fraud theory.
     
     Example Question :
@@ -37,7 +37,7 @@ async def ask_about_credit_cards_fraud_theory(query: str) -> str:
     return f' context: {context}'
 
 @auto_tool(args_schema=Query)
-async def ask_about_credit_cards_fraud_database(query: str) -> str:
+def ask_about_credit_cards_fraud_database(query: str) -> str:
     """Useful for retrieving information about credit card fraud from the database.
     
     Example Question :

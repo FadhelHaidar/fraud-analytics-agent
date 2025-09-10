@@ -23,12 +23,12 @@ class ChatResponse(BaseModel):
     context: list
     sql: list
 
-@app.post("/chat", response_model=ChatResponse)
-async def chat_endpoint(req: ChatRequest):
-    context_store.set([])  # per-request
+@app.post("/chat")
+def chat_endpoint(req: ChatRequest):
+    context_store.set([])
     sql_store.set([])
 
-    response = await get_response(
+    response = get_response(
         query=req.query,
         chat_history=req.chat_history,
         tools=REGISTERED_TOOLS,
@@ -37,7 +37,7 @@ async def chat_endpoint(req: ChatRequest):
     return ChatResponse(
         response=response,
         context=context_store.get(),
-        sql=sql_store.get()
+        sql=sql_store.get(),
     )
 
 if __name__ == "__main__":

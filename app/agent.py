@@ -20,20 +20,19 @@ def _last_assistant_text(messages: list) -> str:
             if content:
                 return str(content)
 
-    # fallback if nothing matched
     if messages:
         last = messages[-1]
         return getattr(last, "content", None) or (last.get("content") if isinstance(last, dict) else "")
     return ""
 
 
-async def get_response(
+def get_response(
     query: str,
     chat_history: List[Dict[str, Any]],
     tools: List[Any],
     *,
     history_max: int = DEFAULT_HISTORY_MAX,
-    timeout_sec: int = DEFAULT_TIMEOUT_SEC,
+    timeout_sec: int = DEFAULT_TIMEOUT_SEC
 ) -> str:
     
     history = chat_history[-history_max:] if chat_history else []
@@ -42,19 +41,15 @@ async def get_response(
     messages = history + [user_message]
 
     agent = create_react_agent(
-        model=get_llm(),           # your init_chat_model wrapper
-        tools=tools,               # whatever tools you pass
-        prompt=system_prompt,      # your system prompt
+        model=get_llm(),          
+        tools=tools,               
+        prompt=system_prompt,      
     )
 
     try:
-        response = await asyncio.wait_for(
-            agent.ainvoke({"messages": messages}),
-            timeout=timeout_sec
-        )
+        response = agent.invoke({"messages": messages})
         return _last_assistant_text(response.get("messages", [])) or "..."
     except asyncio.TimeoutError:
         return "Sorry, the model took too long. Please try again."
     except Exception as e:
-        # Keep it simple; log in your route/middleware if you want details.
         return f"Error: {e}"
