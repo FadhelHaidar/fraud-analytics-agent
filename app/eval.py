@@ -17,7 +17,6 @@ async def evaluate_response(
 
     context = []
     if retrieved_contexts:
-        print("retrieved_contexts", retrieved_contexts)
         for ctx in retrieved_contexts:
             context.append(ctx['page_content'])
 
