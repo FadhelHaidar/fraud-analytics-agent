@@ -23,10 +23,12 @@ pip install -r requirements.txt
 
 ## 1. Prepare the Environment Variables
 
-Create a `.env` file inside the `app/` folder:
+Create a `.env` file inside the `app/` the `notebook/`  folder:
 
 ```
 app/
+  └── .env
+notebook/
   └── .env
 ```
 
@@ -86,3 +88,24 @@ streamlit run streamlit_app.py
 ---
 
 ✅ You are now ready to use the system!
+
+# Project Information
+
+This project is an advanced agent chatbot capable of retrieving non-structured information and querying relational databases.
+It leverages the Groq API to access the `llama-4-maverick-17b-128e-instruct` Large Language Model (LLM) and utilizes Mistral's `codestral` for translating natural language into SQL queries.
+The embedding model used here is `Qwen3-Embedding-0.6B` for performing semantic searches.
+The project employs three key frameworks:
+- **Langgraph/Langchain**: For developing the intelligent agent.
+- **Vanna AI**: For handling the text-to-SQL conversion process.
+- **Ragas**: For agent response evaluation and scoring.
+
+# Code Information
+
+The project consists of the following key files:
+- **app.py**: Contains the endpoint code.
+- **agent.py**: Handles the agent logic.
+- **tools.py**: Includes the code for agent tools.
+- **eval.py**: Evaluates agent responses using faithfulness metrics.
+- **config.py**: Manages model, embedding, and database configurations.
+- **streamlit.app**: The frontend application.
+- **setting.py**: Loads and stores environment variables.
