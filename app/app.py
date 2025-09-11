@@ -1,9 +1,9 @@
-from app.tools import REGISTERED_TOOLS
 from app.agent import get_response
-from app.utils import context_store, sql_store
-from fastapi import FastAPI
+from app.tools import REGISTERED_TOOLS
 from pydantic import BaseModel
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+import traceback
 
 app = FastAPI(title="LangGraph Agent API")
 app.add_middleware(
@@ -19,26 +19,35 @@ class ChatRequest(BaseModel):
     chat_history: list
 
 class ChatResponse(BaseModel):
-    response: str
-    context: list
-    sql: list
+    response: str | None = None
+    chunks: list | None = None
+    sql: list | None = None
+    error: str | None = None  
 
-@app.post("/chat")
+@app.post("/chat", response_model=ChatResponse)
 def chat_endpoint(req: ChatRequest):
-    context_store.set([])
-    sql_store.set([])
+    try:
+        response = get_response(
+            query=req.query,
+            chat_history=req.chat_history,
+            tools=REGISTERED_TOOLS,
+        )
 
-    response = get_response(
-        query=req.query,
-        chat_history=req.chat_history,
-        tools=REGISTERED_TOOLS,
-    )
+        return ChatResponse(
+            response=response.get("response"),
+            chunks=response.get("chunks"),
+            sql=response.get("sql"),
+        )
 
-    return ChatResponse(
-        response=response,
-        context=context_store.get(),
-        sql=sql_store.get(),
-    )
+    except Exception as e:
+        print("Error in /chat:", traceback.format_exc())
+
+        return ChatResponse(
+            response=None,
+            chunks=[],
+            sql=[],
+            error=str(e)
+        )
 
 if __name__ == "__main__":
     import uvicorn

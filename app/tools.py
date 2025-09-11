@@ -1,7 +1,6 @@
 from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 from app.config import get_vector_store, get_vanna
-from app.utils import add_to_context_store, add_to_sql_store
 
 vector_store = get_vector_store()
 vanna = get_vanna()
@@ -33,8 +32,11 @@ def ask_about_credit_cards_fraud_theory(query: str) -> str:
     - "What is the impact of credit card fraud on cardholders, merchants, issuers?"
     """
     context = vector_store.similarity_search(query, k=5)
-    add_to_context_store(context)
-    return f' context: {context}'
+    return {
+        'anwer': f' context: {context}',
+        'chunks': context,
+        'sql': None
+    }
 
 @auto_tool(args_schema=Query)
 def ask_about_credit_cards_fraud_database(query: str) -> str:
@@ -46,6 +48,15 @@ def ask_about_credit_cards_fraud_database(query: str) -> str:
     - "Do specific jobs appear more vulnerable to fraud?
 
     """
-    sql = vanna.generate_sql(query, allow_llm_to_see_data=True)
-    add_to_sql_store(sql)
-    return vanna.run_sql(sql)
+    try:
+        sql = vanna.generate_sql(query, allow_llm_to_see_data=True)
+        response = vanna.run_sql(sql)
+    except:
+        sql = ''
+        response = 'error during query to database'
+
+    return {
+        'answer': response, 
+        'chunks': None, 
+        'sql': sql
+    }
