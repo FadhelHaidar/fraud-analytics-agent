@@ -1,4 +1,5 @@
 from app.agent import get_response
+from app.eval import evaluate_response
 from app.tools import REGISTERED_TOOLS
 from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
@@ -19,6 +20,7 @@ class ChatRequest(BaseModel):
     chat_history: list
 
 class ChatResponse(BaseModel):
+    user_query: str
     response: str | None = None
     chunks: list | None = None
     sql: list | None = None
@@ -34,6 +36,7 @@ def chat_endpoint(req: ChatRequest):
         )
 
         return ChatResponse(
+            user_query=req.query,
             response=response.get("response"),
             chunks=response.get("chunks"),
             sql=response.get("sql"),
@@ -43,11 +46,23 @@ def chat_endpoint(req: ChatRequest):
         print("Error in /chat:", traceback.format_exc())
 
         return ChatResponse(
+            user_query=req.query,
             response=None,
             chunks=[],
             sql=[],
             error=str(e)
         )
+
+@app.post("/eval")
+async def eval_endpoint(req: ChatResponse):
+
+    try:
+        score = await evaluate_response(req.user_query, req.response, req.chunks, req.sql)
+        return {"score": score}
+    except Exception as e:
+        print("Error in /eval:", traceback.format_exc())
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 if __name__ == "__main__":
     import uvicorn
