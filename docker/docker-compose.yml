@@ -1,4 +1,4 @@
-name: study-case-mekari
+name: qa-chatbot
 services:
   postgres:
     image: pgvector/pgvector:pg17-trixie
