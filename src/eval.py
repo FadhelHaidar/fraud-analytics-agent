@@ -3,7 +3,7 @@ from ragas.metrics import Faithfulness
 from ragas.embeddings import LangchainEmbeddingsWrapper
 from ragas.llms import LangchainLLMWrapper
 
-from app.config import get_llm, get_vanna
+from src.utils import get_llm, get_vanna
 
 llm = LangchainLLMWrapper(get_llm())
 vanna = get_vanna()

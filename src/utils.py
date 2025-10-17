@@ -13,7 +13,7 @@ from vanna.base import VannaBase
 from vanna.mistral import Mistral as VannaMistral
 from vanna.qdrant import Qdrant_VectorStore as VannaQdrant_VectorStore
 
-from app.settings import settings
+from src.config import settings
 
 
 DEFAULT_EMBED_MODEL = "Qwen/Qwen3-Embedding-0.6B"

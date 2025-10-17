@@ -1,6 +1,6 @@
 from langchain_core.tools import tool
 from pydantic import BaseModel, Field
-from app.config import get_vector_store, get_vanna
+from src.utils import get_vector_store, get_vanna
 
 vector_store = get_vector_store()
 vanna = get_vanna()
@@ -12,17 +12,19 @@ class Query(BaseModel):
 # registry to hold all tools
 REGISTERED_TOOLS = []
 
-def auto_tool(args_schema):
-    """Decorator that applies @tool and auto-registers the function in a global list."""
+def create_too_registry(tools: list):
+    def auto_tool(args_schema):
+        """Decorator that applies @tool and auto-registers the function in a global list."""
+        def decorator(func):
+            wrapped = tool(args_schema=args_schema)(func)  
+            tools.append(wrapped)
+            return func
+        return decorator
+    return auto_tool
 
-    def decorator(func):
-        wrapped = tool(args_schema=args_schema)(func)  
-        REGISTERED_TOOLS.append(wrapped)
-        return wrapped
+register_tool = create_too_registry(REGISTERED_TOOLS)
 
-    return decorator
-
-@auto_tool(args_schema=Query)
+@register_tool(args_schema=Query)
 def ask_about_credit_cards_fraud_theory(query: str) -> str:
     """Useful for retrieving information about credit card fraud theory.
     
@@ -38,7 +40,7 @@ def ask_about_credit_cards_fraud_theory(query: str) -> str:
         'sql': None
     }
 
-@auto_tool(args_schema=Query)
+@register_tool(args_schema=Query)
 def ask_about_credit_cards_fraud_database(query: str) -> str:
     """Useful for retrieving information about credit card fraud from the database.
     
@@ -51,9 +53,9 @@ def ask_about_credit_cards_fraud_database(query: str) -> str:
     try:
         sql = vanna.generate_sql(query, allow_llm_to_see_data=True)
         response = vanna.run_sql(sql)
-    except:
+    except Exception as e:
         sql = ''
-        response = 'error during query to database'
+        response = 'error during query to database : \n' + str(e)
 
     return {
         'answer': response, 

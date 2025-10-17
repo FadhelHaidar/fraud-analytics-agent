@@ -1,6 +1,6 @@
-from app.agent import get_response
-from app.eval import evaluate_response
-from app.tools import REGISTERED_TOOLS
+from src.agent import get_response
+from src.eval import evaluate_response
+from src.tools import REGISTERED_TOOLS
 from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware

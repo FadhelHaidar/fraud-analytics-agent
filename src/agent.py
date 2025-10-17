@@ -2,8 +2,8 @@ import operator
 from typing import TypedDict, Annotated, Any, List, Dict
 from langchain_core.messages import AnyMessage, ToolMessage, SystemMessage
 from langgraph.graph import StateGraph, END
-from app.config import get_llm
-from app.prompt import system_prompt
+from src.utils import get_llm
+from src.prompt import system_prompt
 
 DEFAULT_HISTORY_MAX = 20
 DEFAULT_TIMEOUT_SEC = 180
